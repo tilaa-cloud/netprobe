@@ -1,0 +1,64 @@
+# Pingding Exporter Configuration
+# This file defines how the exporter will behave
+
+exporter:
+  # HTTP server configuration
+  listen_address: "0.0.0.0"
+  listen_port: 9090
+
+  # Ping execution settings
+  ping_interval_seconds: 60          # Run a complete ping cycle every N seconds
+  batch_size: 100                    # Process targets in batches of N
+  max_parallel_workers: 10           # Number of concurrent ping workers
+
+  # ICMP ping settings (with sensible defaults)
+  icmp:
+    enabled: true
+    timeout_ms: 5000                 # Wait up to 5 seconds for response
+    count: 1                          # Send 1 probe per target
+
+  # ARP ping settings (with sensible defaults)
+  arp:
+    enabled: true
+    timeout_ms: 5000                 # Wait up to 5 seconds for response
+
+# Database source configuration
+database:
+  type: "postgresql"                 # postgresql, mysql, sqlite, etc.
+  host: "localhost"
+  port: 5432
+  database: "network_monitoring"
+  user: "exporter_user"
+  password: "${DB_PASSWORD}"         # Use environment variable for sensitive data
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime_seconds: 600
+
+  # SQL query to fetch targets. Must return columns matching the dimension labels below.
+  # The query is configurable to support different database schemas and organizations.
+  query: |
+    SELECT destination_ip, customer_id, vlan, pod, host
+    FROM targets
+    WHERE active = true
+    ORDER BY destination_ip
+
+  # Dimension labels: maps the select columns (after destination_ip) to target dimensions
+  # The first SELECT column (destination_ip) is always used as the primary IP and is NOT in this list.
+  # Each label in this list corresponds to a subsequent column in the query result, in order.
+  # Example: if query returns [ip, tenant, region, service], you would map the last 3:
+  #   dimension_labels: [tenant, region, service]
+  dimension_labels:
+    - customer_id
+    - vlan
+    - pod
+    - host
+
+# Target refresh settings
+target_refresh:
+  interval_seconds: 300              # Refresh target list every 5 minutes
+  on_startup: true                   # Fetch targets on startup
+
+# Logging
+logging:
+  level: "info"                      # debug, info, warn, error
+  format: "json"                     # json or text

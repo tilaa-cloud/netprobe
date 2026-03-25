@@ -1,0 +1,53 @@
+# Netprobe Exporter Configuration - SQLite
+# Connect to SQLite database file
+
+exporter:
+  listen_address: "0.0.0.0"
+  listen_port: 9090
+
+  ping_interval_seconds: 30            # Short interval for testing
+  batch_size: 10
+  max_parallel_workers: 4
+
+  icmp:
+    enabled: true
+    timeout_ms: 5000
+    count: 1
+
+  arp:
+    enabled: true
+    timeout_ms: 5000
+
+# SQLite database configuration
+database:
+  type: "sqlite"
+  host: "./netprobe.db"               # File path for SQLite database
+  port: 0                             # Not used for SQLite
+  database: ""                        # Not used for SQLite
+  user: ""                            # Not used for SQLite
+  password: ""                        # Not used for SQLite
+  max_open_conns: 5
+  max_idle_conns: 1
+  conn_max_lifetime_seconds: 600
+
+  # Query to fetch targets from SQLite
+  query: |
+    SELECT destination_ip, customer_id, vlan, pod, host
+    FROM targets
+    WHERE active = 1
+    ORDER BY destination_ip
+
+  # Dimension labels matching the query columns (excluding destination_ip which is the primary key)
+  dimension_labels:
+    - customer_id
+    - vlan
+    - pod
+    - host
+
+target_refresh:
+  interval_seconds: 60
+  on_startup: true
+
+logging:
+  level: "info"
+  format: "json"

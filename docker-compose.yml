@@ -1,0 +1,98 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: pingding-postgres
+    environment:
+      POSTGRES_DB: network_monitoring
+      POSTGRES_USER: exporter_user
+      POSTGRES_PASSWORD: exporter_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/postgres-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro,z
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U exporter_user -d network_monitoring" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql:
+    image: mysql:8.0
+    container_name: pingding-mysql
+    environment:
+      MYSQL_DATABASE: network_monitoring
+      MYSQL_USER: exporter_user
+      MYSQL_PASSWORD: exporter_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/mysql-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro,z
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Test targets for pinging (IPv4)
+  test-target-1:
+    image: busybox:latest
+    container_name: test-target-1
+    command: sleep 3600
+    networks:
+      default:
+        ipv4_address: 172.20.0.100
+        ipv6_address: fd00::100
+
+  test-target-2:
+    image: busybox:latest
+    container_name: test-target-2
+    command: sleep 3600
+    networks:
+      default:
+        ipv4_address: 172.20.0.101
+        ipv6_address: fd00::101
+
+  test-target-3:
+    image: busybox:latest
+    container_name: test-target-3
+    command: sleep 3600
+    networks:
+      default:
+        ipv4_address: 172.20.0.102
+        ipv6_address: fd00::102
+
+  # IPv6-only test targets
+  test-target-ipv6-1:
+    image: busybox:latest
+    container_name: test-target-ipv6-1
+    command: sleep 3600
+    networks:
+      default:
+        ipv6_address: fd00::200
+
+  test-target-ipv6-2:
+    image: busybox:latest
+    container_name: test-target-ipv6-2
+    command: sleep 3600
+    networks:
+      default:
+        ipv6_address: fd00::201
+
+volumes:
+  postgres_data:
+  mysql_data:
+
+
+networks:
+  default:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+        - subnet: fd00::/64
+          gateway: fd00::1

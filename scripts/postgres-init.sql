@@ -1,4 +1,4 @@
--- PostgreSQL initialization script for pingding
+-- PostgreSQL initialization script for netprobe
 CREATE TABLE
     IF NOT EXISTS targets (
         id SERIAL PRIMARY KEY,

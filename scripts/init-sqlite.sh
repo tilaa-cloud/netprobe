@@ -1,7 +1,7 @@
 #!/bin/bash
 # SQLite database initialization script for local testing
 
-DB_FILE="./pingding.db"
+DB_FILE="./netprobe.db"
 
 # Create the database and schema
 sqlite3 "$DB_FILE" <<EOF

@@ -1,4 +1,4 @@
--- MySQL initialization script for pingding
+-- MySQL initialization script for netprobe
 CREATE TABLE
     IF NOT EXISTS targets (
         id INT AUTO_INCREMENT PRIMARY KEY,

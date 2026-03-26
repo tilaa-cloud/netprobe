@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: pingding-postgres
+    container_name: netprobe_postgres
     environment:
       POSTGRES_DB: network_monitoring
       POSTGRES_USER: exporter_user
@@ -19,7 +19,7 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: pingding-mysql
+    container_name: netprobe_mysql
     environment:
       MYSQL_DATABASE: network_monitoring
       MYSQL_USER: exporter_user
@@ -39,7 +39,6 @@ services:
   # Test targets for pinging (IPv4)
   test-target-1:
     image: busybox:latest
-    container_name: test-target-1
     command: sleep 3600
     networks:
       default:
@@ -48,7 +47,6 @@ services:
 
   test-target-2:
     image: busybox:latest
-    container_name: test-target-2
     command: sleep 3600
     networks:
       default:
@@ -57,7 +55,6 @@ services:
 
   test-target-3:
     image: busybox:latest
-    container_name: test-target-3
     command: sleep 3600
     networks:
       default:
@@ -67,7 +64,6 @@ services:
   # IPv6-only test targets
   test-target-ipv6-1:
     image: busybox:latest
-    container_name: test-target-ipv6-1
     command: sleep 3600
     networks:
       default:
@@ -75,7 +71,6 @@ services:
 
   test-target-ipv6-2:
     image: busybox:latest
-    container_name: test-target-ipv6-2
     command: sleep 3600
     networks:
       default:

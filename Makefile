@@ -61,11 +61,11 @@ docker-logs:
 
 docker-shell-postgres:
 	@echo "🔧 Opening PostgreSQL shell..."
-	docker exec -it pingding-postgres psql -U exporter_user -d network_monitoring
+	docker exec -it netprobe-postgres psql -U exporter_user -d network_monitoring
 
 docker-shell-mysql:
 	@echo "🔧 Opening MySQL shell..."
-	docker exec -it pingding-mysql mysql -u exporter_user -pexporter_password network_monitoring
+	docker exec -it netprobe-mysql mysql -u exporter_user -pexporter_password network_monitoring
 
 # Build target
 build:

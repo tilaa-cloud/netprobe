@@ -1,4 +1,4 @@
-# Pingding Exporter Configuration
+# Netprobe Exporter Configuration
 # This file defines how the exporter will behave
 
 exporter:

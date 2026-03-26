@@ -57,7 +57,7 @@ database:
 ## Running
 
 ```bash
-./pingding --config config.yaml
+./netprobe --config config.yaml
 ```
 
 Metrics will be available at `http://localhost:9090/metrics`
@@ -71,13 +71,13 @@ make test
 ## Metrics
 
 ### Packet Loss
-- **Name**: `pingding_packet_loss_percent`
+- **Name**: `netprobe_packet_loss_percent`
 - **Type**: Gauge
 - **Labels**: `destination_ip`, `method`, `customer_id`, `vlan`, `pod`, `host`
 - **Value**: 0-100 (percentage of lost packets)
 
 ### Latency (Min/Max/Avg)
-- **Names**: `pingding_latency_min_ms`, `pingding_latency_max_ms`, `pingding_latency_avg_ms`
+- **Names**: `netprobe_latency_min_ms`, `netprobe_latency_max_ms`, `netprobe_latency_avg_ms`
 - **Type**: Gauge
 - **Labels**: Same as packet loss
 - **Value**: Response time in milliseconds
@@ -85,8 +85,8 @@ make test
 ## Example Metrics
 
 ```
-pingding_packet_loss_percent{destination_ip="10.0.0.1",method="icmp",customer_id="acme",vlan="prod",pod="us-west-2",host="server-01"} 0.0
-pingding_latency_avg_ms{destination_ip="10.0.0.1",method="icmp",customer_id="acme",vlan="prod",pod="us-west-2",host="server-01"} 2.5
+netprobe_packet_loss_percent{destination_ip="10.0.0.1",method="icmp",customer_id="acme",vlan="prod",pod="us-west-2",host="server-01"} 0.0
+netprobe_latency_avg_ms{destination_ip="10.0.0.1",method="icmp",customer_id="acme",vlan="prod",pod="us-west-2",host="server-01"} 2.5
 ```
 
 ## Architecture

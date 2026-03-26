@@ -1,0 +1,33 @@
+[Unit]
+Description=Netprobe - Network Connectivity Monitoring Daemon
+Documentation=https://github.com/tilaa-cloud/netprobe
+After=network.target
+
+[Service]
+Type=simple
+User=netprobe
+Group=netprobe
+ExecStart=/usr/sbin/netprobe -config /etc/netprobe/config.yaml
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=netprobe
+
+# Capabilities for raw socket operations (ARP, NDP, ICMP)
+AmbientCapabilities=CAP_NET_RAW
+CapabilityBoundingSet=CAP_NET_RAW
+SecureBits=keep-caps
+
+# Security hardening (without NoNewPrivileges since we need capability access)
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/log/netprobe /var/lib/netprobe
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

@@ -109,7 +109,7 @@ func LoadConfig(filePath string) (*Config, error) {
 	viper.SetDefault("logging.format", "json")
 
 	viper.SetDefault("database.query", `SELECT destination_ip, customer_id, vlan, pod, host FROM targets WHERE active = true ORDER BY destination_ip`)
-	viper.SetDefault("database.dimension_labels", []string{"destination_ip", "customer_id", "vlan", "pod", "host"})
+	viper.SetDefault("database.dimension_labels", []string{"customer_id", "vlan", "pod", "host"})
 
 	// Read config file
 	if err := viper.ReadInConfig(); err != nil {

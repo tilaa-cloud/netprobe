@@ -27,7 +27,9 @@ jobs:
         run: |
           dnf install -y \
             git \
-            make
+            make \
+            gcc \
+            libpcap-devel
           
           # Install Go 1.21
           curl -L https://go.dev/dl/go1.21.9.linux-amd64.tar.gz -o go.tar.gz

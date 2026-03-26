@@ -1,0 +1,97 @@
+name: Tests & Linting
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - '**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.19'
+          cache: true
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpcap-dev
+
+      - name: Run tests
+        run: make test
+
+      - name: Generate test coverage
+        run: make test-debug || true
+
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.19'
+          cache: true
+
+      - name: Run go fmt check
+        run: |
+          if [ -n "$(gofmt -s -l .)" ]; then
+            echo "❌ Go code is not formatted. Run 'go fmt ./...'"
+            gofmt -s -d .
+            exit 1
+          fi
+          echo "✅ All files are properly formatted"
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=5m
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.19'
+          cache: true
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpcap-dev
+
+      - name: Build netprobe daemon
+        run: go build -v -o netprobe ./cmd/netprobe
+
+      - name: Build netprobe-ping CLI
+        run: go build -v -o netprobe-ping ./cmd/netprobe-ping
+
+      - name: Verify binaries
+        run: |
+          ./netprobe -h 2>&1 | head -5 || true
+          ./netprobe-ping -h 2>&1 | head -5 || true

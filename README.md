@@ -99,3 +99,5 @@ The exporter uses a scalable, concurrent architecture:
 4. **Non-blocking Collection**: Results collected concurrently to prevent deadlocks
 5. **Metrics Storage**: Thread-safe in-memory metrics storage
 6. **HTTP Exposition**: Prometheus-compatible `/metrics` endpoint
+
+![Tests](https://github.com/tilaa-cloud/netprobe/actions/workflows/tests.yml/badge.svg)

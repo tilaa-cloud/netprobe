@@ -1,0 +1,138 @@
+name: Build RPM Package
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Build on version tags like v1.0.0
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build'
+        required: true
+
+jobs:
+  build-rpm:
+    runs-on: ubuntu-latest
+    container:
+      image: almalinux:9
+    steps:
+      - name: Install RPM build tools
+        run: |
+          dnf install -y \
+            rpmdevtools \
+            rpm-build \
+            shadow-utils
+
+      - name: Install Go and build dependencies (for compilation only)
+        run: |
+          dnf install -y \
+            golang \
+            git \
+            make
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"
+          elif [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="1.0.0-dev"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+
+      - name: Build binaries
+        run: |
+          echo "Compiling netprobe daemon..."
+          go build -o netprobe ./cmd/netprobe
+          echo "Compiling netprobe-ping CLI tool..."
+          go build -o netprobe-ping ./cmd/netprobe-ping
+          
+          # Verify binaries were created
+          file netprobe netprobe-ping
+
+      - name: Create RPM build structure
+        run: |
+          rpmdev-setuptree
+
+      - name: Create source tarball with pre-compiled binaries
+        run: |
+          mkdir -p ~/rpmbuild/SOURCES
+          
+          # Create staging directory with proper structure
+          STAGE_DIR=$(mktemp -d)
+          PKG_DIR="$STAGE_DIR/netprobe-${{ steps.version.outputs.version }}"
+          mkdir -p "$PKG_DIR"
+          
+          # Copy binaries and config files into staging directory
+          cp netprobe "$PKG_DIR/"
+          cp netprobe-ping "$PKG_DIR/"
+          cp Makefile "$PKG_DIR/"
+          cp README.md "$PKG_DIR/"
+          cp LICENSE "$PKG_DIR/"
+          cp config.example.yaml "$PKG_DIR/"
+          cp netprobe.service "$PKG_DIR/"
+          cp -r scripts/ "$PKG_DIR/" 2>/dev/null || true
+          
+          # Create tarball from staging directory
+          tar -czf ~/rpmbuild/SOURCES/netprobe-${{ steps.version.outputs.version }}.tar.gz \
+              -C "$STAGE_DIR" "netprobe-${{ steps.version.outputs.version }}"
+          
+          rm -rf "$STAGE_DIR"
+          echo "✓ Source tarball created"
+
+      - name: Copy SPEC file to build directory
+        run: |
+          cp rpm/netprobe.spec ~/rpmbuild/SPECS/
+
+      - name: Copy systemd service to build directory
+        run: |
+          cp rpm/netprobe.service ~/rpmbuild/SOURCES/netprobe.service
+
+      - name: Build RPM
+        run: |
+          rpmbuild -ba \
+            --define "version ${{ steps.version.outputs.version }}" \
+            --define "release 1" \
+            ~/rpmbuild/SPECS/netprobe.spec
+
+      - name: Upload RPM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: netprobe-rpm
+          path: |
+            ~/rpmbuild/RPMS/x86_64/netprobe-*.rpm
+            ~/rpmbuild/SRPM/netprobe-*.src.rpm
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ~/rpmbuild/RPMS/x86_64/netprobe-*.rpm
+            ~/rpmbuild/SRPM/netprobe-*.src.rpm
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test RPM installation
+        run: |
+          dnf install -y ~/rpmbuild/RPMS/x86_64/netprobe-${{ steps.version.outputs.version }}-1.el9.x86_64.rpm
+
+      - name: Verify binaries are installed
+        run: |
+          which netprobe-ping
+          /usr/sbin/netprobe --help 2>&1 | head -5 || true
+          /usr/bin/netprobe-ping --help 2>&1 | head -5 || true
+
+      - name: Verify capabilities are set
+        run: |
+          getcap /usr/sbin/netprobe
+          getcap /usr/bin/netprobe-ping

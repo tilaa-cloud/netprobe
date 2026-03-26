@@ -30,7 +30,7 @@ func checkRawSocketPermission() bool {
 	if err != nil {
 		return false
 	}
-	syscall.Close(fd)
+	_ = syscall.Close(fd) // nolint: errcheck
 	return true
 }
 
@@ -118,7 +118,7 @@ func main() {
 
 	logger.Info("Shutdown signal received, stopping")
 	cancel()
-	httpServer.Stop()
+	_ = httpServer.Stop() // nolint: errcheck
 }
 
 // setupDatabase creates and configures a database connection

@@ -22,7 +22,7 @@ func checkRawSocketPermission() bool {
 	if err != nil {
 		return false
 	}
-	syscall.Close(fd)
+	_ = syscall.Close(fd) // nolint: errcheck
 	return true
 }
 

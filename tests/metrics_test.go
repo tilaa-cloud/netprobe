@@ -76,9 +76,10 @@ func TestIntegration_PacketLossTracking(t *testing.T) {
 	// Find ICMP and ARP metrics
 	var icmpMetric, arpMetric metrics.MetricValue
 	for _, entry := range allMetrics {
-		if entry.Key.Method == "icmp" {
+		switch entry.Key.Method {
+		case "icmp":
 			icmpMetric = entry.Value
-		} else if entry.Key.Method == "arp" {
+		case "arp":
 			arpMetric = entry.Value
 		}
 	}

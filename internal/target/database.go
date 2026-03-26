@@ -28,7 +28,7 @@ func (d *DatabaseSource) Fetch(ctx context.Context) ([]Target, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }() // nolint: errcheck
 
 	var targets []Target
 	for rows.Next() {

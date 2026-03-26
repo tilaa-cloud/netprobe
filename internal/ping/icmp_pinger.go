@@ -5,6 +5,7 @@ import (
 	"net"
 	"time"
 
+	//nolint:staticcheck // Package is deprecated but maintained by community and still functional
 	goping "github.com/go-ping/ping"
 
 	"netprobe/internal/logger"

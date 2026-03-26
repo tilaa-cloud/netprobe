@@ -41,8 +41,16 @@ func TestIntegration_HTTPServerMetricsEndpoint(t *testing.T) {
 
 	// Start HTTP server
 	server := httpserver.NewServer(":9099", collector) // Use non-standard port for testing
-	go server.Start()
-	defer server.Stop()
+	go func() {
+		if err := server.Start(); err != nil {
+			t.Logf("Server start error: %v", err)
+		}
+	}()
+	defer func() {
+		if err := server.Stop(); err != nil {
+			t.Logf("Server stop error: %v", err)
+		}
+	}()
 
 	// Give server time to start
 	time.Sleep(100 * time.Millisecond)
@@ -50,7 +58,7 @@ func TestIntegration_HTTPServerMetricsEndpoint(t *testing.T) {
 	// Query /metrics endpoint
 	resp, err := http.Get("http://localhost:9099/metrics")
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }() // nolint: errcheck
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	body, err := io.ReadAll(resp.Body)

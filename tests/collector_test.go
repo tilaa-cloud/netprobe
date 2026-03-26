@@ -109,7 +109,9 @@ func TestIntegration_MetricLabels(t *testing.T) {
 
 	collector := metrics.NewPrometheusCollector(store, dimensionLabels)
 	reg := prometheus.NewRegistry()
-	reg.Register(collector)
+	if err := reg.Register(collector); err != nil {
+		t.Logf("Failed to register collector: %v", err)
+	}
 
 	resp, _ := prometheus.DefaultGatherer.Gather()
 	if resp == nil {

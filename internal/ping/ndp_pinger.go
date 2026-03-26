@@ -246,7 +246,9 @@ func (p *NDPPinger) neighborSolicitation(targetIP net.IP, iface *net.Interface) 
 		TargetAddress: targetIP,
 	}
 
-	icmpv6.SetNetworkLayerForChecksum(&ipv6)
+	if err := icmpv6.SetNetworkLayerForChecksum(&ipv6); err != nil {
+		logger.Debug("[NDP] Failed to set network layer for checksum: %v", err)
+	}
 
 	buffer := gopacket.NewSerializeBuffer()
 	opts := gopacket.SerializeOptions{ComputeChecksums: true, FixLengths: true}

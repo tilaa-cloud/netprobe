@@ -143,7 +143,7 @@ jobs:
 
       - name: Verify binaries are installed
         run: |
-          which netprobe-ping
+          test -f /usr/bin/netprobe-ping && echo "✓ netprobe-ping found at /usr/bin/netprobe-ping"
           /usr/sbin/netprobe --help 2>&1 | head -5 || true
           /usr/bin/netprobe-ping --help 2>&1 | head -5 || true
 

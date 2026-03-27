@@ -92,7 +92,7 @@ jobs:
           cp README.md "$PKG_DIR/"
           cp LICENSE "$PKG_DIR/"
           cp config.example.yaml "$PKG_DIR/"
-          cp netprobe.service "$PKG_DIR/"
+          cp rpm/netprobe.service "$PKG_DIR/"
           cp -r scripts/ "$PKG_DIR/" 2>/dev/null || true
           
           # Create tarball from staging directory

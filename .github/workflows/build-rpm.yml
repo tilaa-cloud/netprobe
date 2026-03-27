@@ -124,6 +124,8 @@ jobs:
           path: |
             ~/rpmbuild/RPMS/x86_64/netprobe-*.rpm
             ~/rpmbuild/SRPM/netprobe-*.src.rpm
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')

@@ -25,14 +25,17 @@ jobs:
 
       - name: Install Go and build dependencies (for compilation only)
         run: |
-          dnf update -y
+          # Enable PowerTools repository for libpcap-devel
+          dnf install -y dnf-plugins-core
+          dnf config-manager --set-enabled crb
+
           dnf install -y \
             git \
             make \
             gcc \
             libpcap-devel \
             pkg-config
-          
+
           # Install Go 1.21
           curl -L https://go.dev/dl/go1.21.9.linux-amd64.tar.gz -o go.tar.gz
           rm -rf /usr/local/go

@@ -25,6 +25,7 @@ jobs:
 
       - name: Install Go and build dependencies (for compilation only)
         run: |
+          dnf update -y
           dnf install -y \
             git \
             make \

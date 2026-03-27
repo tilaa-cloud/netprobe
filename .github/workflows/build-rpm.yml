@@ -65,9 +65,9 @@ jobs:
         run: |
           export PATH="/usr/local/go/bin:$PATH"
           echo "Compiling netprobe daemon..."
-          go build -o netprobe ./cmd/netprobe
+          go build -buildvcs=false -o netprobe ./cmd/netprobe
           echo "Compiling netprobe-ping CLI tool..."
-          go build -o netprobe-ping ./cmd/netprobe-ping
+          go build -buildvcs=false -o netprobe-ping ./cmd/netprobe-ping
           
           # Verify binaries were created
           file netprobe netprobe-ping
